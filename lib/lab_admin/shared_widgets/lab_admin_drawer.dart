@@ -39,6 +39,15 @@ class _LabAdminDrawerState extends State<LabAdminDrawer> {
 
   @override
   Widget build(BuildContext context) {
+
+    final width = MediaQuery.of(context).size.width;
+
+    final titleSize = width < 400 ? 18.0 : 20.0;
+    final subtitleSize = width < 400 ? 14.0 : 16.0;
+    final emailSize = width < 400 ? 12.0 : 14.0;
+    final menuSize = width < 400 ? 15.0 : 17.0;
+    final iconSize = width < 400 ? 22.0 : 26.0;
+
     return Drawer(
       backgroundColor: AppColors.navy,
       child: Column(
@@ -58,8 +67,8 @@ class _LabAdminDrawerState extends State<LabAdminDrawer> {
               children: [
 
                 Container(
-                  height: 64,
-                  width: 64,
+                  height: width < 400 ? 60 : 72,
+                  width: width < 400 ? 60 : 72,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
@@ -77,22 +86,22 @@ class _LabAdminDrawerState extends State<LabAdminDrawer> {
 
                 const SizedBox(height: 12),
 
-                const Text(
+                Text(
                   "Asset Management System",
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 18,
+                    fontSize: titleSize,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
 
                 const SizedBox(height: 4),
 
-                const Text(
+                Text(
                   "Lab Admin",
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: subtitleSize,
                   ),
                 ),
 
@@ -100,9 +109,10 @@ class _LabAdminDrawerState extends State<LabAdminDrawer> {
 
                 Text(
                   _userEmail,
-                  style: const TextStyle(
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
                     color: Colors.white70,
-                    fontSize: 13,
+                    fontSize: emailSize,
                   ),
                 ),
               ],
@@ -113,19 +123,19 @@ class _LabAdminDrawerState extends State<LabAdminDrawer> {
 
           /// MENU ITEMS
 
-          _item(context, Icons.dashboard, "Dashboard", "/labAdminDashboard"),
+          _item(context, Icons.dashboard, "Dashboard", "/labAdminDashboard", menuSize, iconSize),
 
-          _item(context, Icons.pending_actions, "Pending Approvals", "/labAdminPendingApprovals"),
+          _item(context, Icons.pending_actions, "Approvals", "/labAdminApprovals", menuSize, iconSize),
 
-          _item(context, Icons.group, "Manage Users", "/labAdminUsers"),
+          _item(context, Icons.group, "Users", "/manageUsers", menuSize, iconSize),
 
-          _item(context, Icons.settings, "Manage Skills Requirements", "/labAdminSkills"),
+          _item(context, Icons.settings, "Skills", "/manageSkills", menuSize, iconSize),
 
-          _item(context, Icons.add_box, "Add New Categories", "/labAdminAddCategories"),
+          _item(context, Icons.add_box, "Add Categories", "/addCategories", menuSize, iconSize),
 
-          _item(context, Icons.view_list, "Category Hierarchy", "/labAdminCategoryHierarchy"),
+          _item(context, Icons.view_list, "Category Hierarchy", "/categoryHierarchy", menuSize, iconSize),
 
-          _item(context, Icons.apartment, "Manage Departments", "/labAdminDepartments"),
+          _item(context, Icons.apartment, "Departments", "/manageDepartments", menuSize, iconSize),
 
           const Spacer(),
 
@@ -133,10 +143,13 @@ class _LabAdminDrawerState extends State<LabAdminDrawer> {
 
           /// LOGOUT
           ListTile(
-            leading: const Icon(Icons.logout, color: Colors.redAccent),
-            title: const Text(
+            leading: Icon(Icons.logout, color: Colors.redAccent, size: iconSize),
+            title: Text(
               "Logout",
-              style: TextStyle(color: Colors.redAccent),
+              style: TextStyle(
+                color: Colors.redAccent,
+                fontSize: menuSize,
+              ),
             ),
             onTap: () async {
 
@@ -157,18 +170,23 @@ class _LabAdminDrawerState extends State<LabAdminDrawer> {
       IconData icon,
       String title,
       String route,
+      double textSize,
+      double iconSize,
       ) {
+
     final bool selected = widget.currentRoute == route;
 
     return ListTile(
-      dense: true,
+      dense: false,
       leading: Icon(
         icon,
+        size: iconSize,
         color: selected ? AppColors.neonBlue : Colors.white70,
       ),
       title: Text(
         title,
         style: TextStyle(
+          fontSize: textSize,
           color: selected ? AppColors.neonBlue : Colors.white70,
           fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
         ),

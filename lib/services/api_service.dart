@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
   // Change per environment
-  static const String baseUrl = "http://192.168.0.108:8000/api";
+  static const String baseUrl = "https://asset-management-system-bk61.onrender.com/api";
 
   // Secure token storage
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
