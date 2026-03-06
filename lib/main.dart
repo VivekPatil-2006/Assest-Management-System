@@ -104,6 +104,12 @@
 //   }
 // }
 
+import 'package:assest_management_system/user/all_assests/user_all_assets_screen.dart';
+import 'package:assest_management_system/user/available_assests/user_available_screen.dart';
+import 'package:assest_management_system/user/my_assests/user_my_assets_screen.dart';
+import 'package:assest_management_system/user/overview/user_overview.dart';
+import 'package:assest_management_system/user/request_assests/user_request_asset_screen.dart';
+import 'package:assest_management_system/user/requests/user_my_requests_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'assets_incharge/dashboard/assets_incharge_dashboard.dart';
@@ -154,28 +160,31 @@ class AMSApp extends StatelessWidget {
 
         "/assetDashboard": (context) => const AssetDashboard(),
 
+
+
+
+        ////////////// ADMIN /////////////////////////////
         "/assetInchargeDashboard": (context) => const AssetInchargeDashboard(),
-
         "/labAdminApprovals": (context) => const PendingApprovalsScreen(),
-
         "/manageUsers": (context) => const UserListScreen(),
-
         "/manageSkills": (context) => const SkillsListScreen(),
-
         "/addCategories": (context) => const CategoriesListScreen(),
-
         "/categoryHierarchy": (context) => const CategoryHierarchyScreen(),
-
         "/manageDepartments": (context) => const ManageDepartmentsScreen(),
+
+
+
+        //////////  USER ////////////////////////////
+        "/userOverview": (context) => const UserOverview(),
+        "/userAllAssets": (context) => const UserAllAssetsScreen(),
+        "/userAvailableAssets": (context) => const UserAvailableScreen(),
+        "/userMyAssets": (context) => const UserMyAssetsScreen(),
+        "/userMyRequests": (context) => const UserMyRequestsScreen(),
+        "/userRequestAsset": (context) => const UserRequestAssetScreen(),
       },
     );
   }
 }
-
-
-
-
-
 
 /* =========================================================
    TEMP DASHBOARD SCREENS

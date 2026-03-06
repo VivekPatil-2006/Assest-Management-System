@@ -55,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
           break;
 
         case "asset_user":
-          Navigator.pushReplacementNamed(context, "/assetDashboard");
+          Navigator.pushReplacementNamed(context, "/userOverview");
           break;
 
         default:
