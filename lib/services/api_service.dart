@@ -1,10 +1,16 @@
 import 'dart:convert';
+import 'dart:async';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
-  // Change per environment
-  static const String baseUrl = "https://asset-management-system-bk61.onrender.com/api";
+  static const String _defaultBaseUrl = "https://asset-management-system-bk61.onrender.com/api";
+  static const String baseUrl = String.fromEnvironment(
+    "API_BASE_URL",
+    defaultValue: _defaultBaseUrl,
+  );
+  static const Duration _requestTimeout = Duration(seconds: 25);
 
   // Secure token storage
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
@@ -37,9 +43,13 @@ class ApiService {
   // Core HTTP methods
   // =========================
   static Future<dynamic> getPublic(String path) async {
-    final response = await http.get(
-      Uri.parse("$baseUrl$path"),
-      headers: {"Content-Type": "application/json"},
+    final response = await _safeRequest(
+      () => http
+          .get(
+            Uri.parse("$baseUrl$path"),
+            headers: {"Content-Type": "application/json"},
+          )
+          .timeout(_requestTimeout),
     );
 
     _handleError(response);
@@ -50,10 +60,14 @@ class ApiService {
       String path,
       Map<String, dynamic> body,
       ) async {
-    final response = await http.post(
-      Uri.parse("$baseUrl$path"),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(body),
+    final response = await _safeRequest(
+      () => http
+          .post(
+            Uri.parse("$baseUrl$path"),
+            headers: {"Content-Type": "application/json"},
+            body: jsonEncode(body),
+          )
+          .timeout(_requestTimeout),
     );
 
     _handleError(response);
@@ -63,9 +77,13 @@ class ApiService {
   static Future<dynamic> get(String path) async {
     final token = await _requireToken();
 
-    final response = await http.get(
-      Uri.parse("$baseUrl$path"),
-      headers: {"Authorization": "Bearer $token"},
+    final response = await _safeRequest(
+      () => http
+          .get(
+            Uri.parse("$baseUrl$path"),
+            headers: {"Authorization": "Bearer $token"},
+          )
+          .timeout(_requestTimeout),
     );
 
     _handleError(response);
@@ -78,13 +96,17 @@ class ApiService {
       ) async {
     final token = await _requireToken();
 
-    final response = await http.post(
-      Uri.parse("$baseUrl$path"),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
-      body: jsonEncode(body),
+    final response = await _safeRequest(
+      () => http
+          .post(
+            Uri.parse("$baseUrl$path"),
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer $token",
+            },
+            body: jsonEncode(body),
+          )
+          .timeout(_requestTimeout),
     );
 
     _handleError(response);
@@ -97,13 +119,17 @@ class ApiService {
       ) async {
     final token = await _requireToken();
 
-    final response = await http.put(
-      Uri.parse("$baseUrl$path"),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
-      body: jsonEncode(body),
+    final response = await _safeRequest(
+      () => http
+          .put(
+            Uri.parse("$baseUrl$path"),
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer $token",
+            },
+            body: jsonEncode(body),
+          )
+          .timeout(_requestTimeout),
     );
 
     _handleError(response);
@@ -116,13 +142,17 @@ class ApiService {
       ) async {
     final token = await _requireToken();
 
-    final response = await http.patch(
-      Uri.parse("$baseUrl$path"),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
-      body: jsonEncode(body),
+    final response = await _safeRequest(
+      () => http
+          .patch(
+            Uri.parse("$baseUrl$path"),
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer $token",
+            },
+            body: jsonEncode(body),
+          )
+          .timeout(_requestTimeout),
     );
 
     _handleError(response);
@@ -132,9 +162,13 @@ class ApiService {
   static Future<dynamic> delete(String path) async {
     final token = await _requireToken();
 
-    final response = await http.delete(
-      Uri.parse("$baseUrl$path"),
-      headers: {"Authorization": "Bearer $token"},
+    final response = await _safeRequest(
+      () => http
+          .delete(
+            Uri.parse("$baseUrl$path"),
+            headers: {"Authorization": "Bearer $token"},
+          )
+          .timeout(_requestTimeout),
     );
 
     _handleError(response);
@@ -187,6 +221,22 @@ class ApiService {
       return jsonDecode(response.body);
     } catch (_) {
       return {"raw": response.body};
+    }
+  }
+
+  static Future<http.Response> _safeRequest(
+    Future<http.Response> Function() request,
+  ) async {
+    try {
+      return await request();
+    } on SocketException {
+      throw Exception(
+        "Cannot reach server. Check internet connection or verify API host DNS.",
+      );
+    } on TimeoutException {
+      throw Exception("Request timed out. Please try again.");
+    } on HttpException catch (e) {
+      throw Exception("Network error: ${e.message}");
     }
   }
 

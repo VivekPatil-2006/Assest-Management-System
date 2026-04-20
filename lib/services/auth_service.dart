@@ -1,8 +1,14 @@
 import 'dart:convert';
+import 'dart:async';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 
 class AuthService {
-  static const String baseUrl = "http://YOUR_SERVER_URL/api/auth";
+  static const String baseUrl = String.fromEnvironment(
+    "API_AUTH_BASE_URL",
+    defaultValue: "https://asset-management-system-bk61.onrender.com/api/auth",
+  );
+  static const Duration _requestTimeout = Duration(seconds: 25);
 
   /* ==============================
         LOGIN
@@ -13,15 +19,19 @@ class AuthService {
     required String password,
   }) async {
 
-    final response = await http.post(
-      Uri.parse("$baseUrl/login"),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: jsonEncode({
-        "email": email,
-        "password": password,
-      }),
+    final response = await _safeRequest(
+      () => http
+          .post(
+            Uri.parse("$baseUrl/login"),
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: jsonEncode({
+              "email": email,
+              "password": password,
+            }),
+          )
+          .timeout(_requestTimeout),
     );
 
     final data = jsonDecode(response.body);
@@ -47,20 +57,24 @@ class AuthService {
     String? department,
   }) async {
 
-    final response = await http.post(
-      Uri.parse("$baseUrl/signup"),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: jsonEncode({
-        "firstName": firstName,
-        "lastName": lastName,
-        "email": email,
-        "password": password,
-        "confirmPassword": confirmPassword,
-        "role": role,
-        "department": department
-      }),
+    final response = await _safeRequest(
+      () => http
+          .post(
+            Uri.parse("$baseUrl/signup"),
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: jsonEncode({
+              "firstName": firstName,
+              "lastName": lastName,
+              "email": email,
+              "password": password,
+              "confirmPassword": confirmPassword,
+              "role": role,
+              "department": department
+            }),
+          )
+          .timeout(_requestTimeout),
     );
 
     final data = jsonDecode(response.body);
@@ -69,6 +83,22 @@ class AuthService {
       return data;
     } else {
       throw Exception(data["message"] ?? "Signup failed");
+    }
+  }
+
+  static Future<http.Response> _safeRequest(
+    Future<http.Response> Function() request,
+  ) async {
+    try {
+      return await request();
+    } on SocketException {
+      throw Exception(
+        "Cannot reach server. Check internet connection or verify API host DNS.",
+      );
+    } on TimeoutException {
+      throw Exception("Request timed out. Please try again.");
+    } on HttpException catch (e) {
+      throw Exception("Network error: ${e.message}");
     }
   }
 }
